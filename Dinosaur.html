@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome Dinosaur Game</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #gameCanvas {
+            display: block;
+            background-color: #f4f4f4;
+            margin: 0 auto;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 24px;
+            color: #333;
+            z-index: 100;
+        }
+
+        .dino {
+            width: 44px;
+            height: 47px;
+            background-color: #4CAF50;
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+        }
+
+        .obstacle {
+            width: 30px;
+            height: 30px;
+            background-color: #333;
+            position: absolute;
+            bottom: 50px;
+        }
+
+        .jumping {
+            animation: jump 0.3s forwards;
+        }
+
+        @keyframes jump {
+            0% { bottom: 50px; }
+            50% { bottom: 100px; }
+            100% { bottom: 50px; }
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            color: red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="score">Score: 0</div>
+    <div id="gameCanvas">
+        <div class="dino" id="dino"></div>
+        <div class="game-over" id="gameOver">Game Over</div>
+    </div>
+
+    <script>
+        const dino = document.getElementById('dino');
+        const scoreDisplay = document.getElementById('score');
+        const gameOverText = document.getElementById('gameOver');
+        const gameCanvas = document.getElementById('gameCanvas');
+        
+        let score = 0;
+        let isJumping = false;
+        let gameInterval;
+        let obstacleSpeed = 2;
+        let obstacles = [];
+        
+        // Dino Jumping Function
+        function jump() {
+            if (!isJumping) {
+                isJumping = true;
+                dino.classList.add('jumping');
+                setTimeout(() => {
+                    dino.classList.remove('jumping');
+                    isJumping = false;
+                }, 300);
+            }
+        }
+
+        // Create Obstacles
+        function createObstacle() {
+            let obstacle = document.createElement('div');
+            obstacle.classList.add('obstacle');
+            obstacle.style.left = '100vw';
+            obstacle.style.bottom = '50px';
+            gameCanvas.appendChild(obstacle);
+            obstacles.push(obstacle);
+        }
+
+        // Move Obstacles
+        function moveObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                let obstacle = obstacles[i];
+                let obstaclePosition = obstacle.getBoundingClientRect();
+                let dinoPosition = dino.getBoundingClientRect();
+                
+                // Check for collision
+                if (
+                    obstaclePosition.left < dinoPosition.right &&
+                    obstaclePosition.right > dinoPosition.left &&
+                    obstaclePosition.bottom > dinoPosition.top
+                ) {
+                    endGame();
+                    return;
+                }
+
+                // Move obstacle to the left
+                if (obstaclePosition.left > 0) {
+                    obstacle.style.left = obstaclePosition.left - obstacleSpeed + 'px';
+                } else {
+                    obstacle.remove();
+                    obstacles.splice(i, 1);
+                    score++;
+                    scoreDisplay.textContent = 'Score: ' + score;
+                }
+            }
+        }
+
+        // End Game
+        function endGame() {
+            clearInterval(gameInterval);
+            gameOverText.style.display = 'block';
+        }
+
+        // Event Listener for Jumping
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                jump();
+            }
+        });
+
+        // Start the Game
+        function startGame() {
+            gameInterval = setInterval(() => {
+                moveObstacles();
+            }, 20);
+            
+            setInterval(createObstacle, 2000); // Create obstacle every 2 seconds
+        }
+
+        // Restart the Game
+        function restartGame() {
+            score = 0;
+            obstacles.forEach(obstacle => obstacle.remove());
+            obstacles = [];
+            scoreDisplay.textContent = 'Score: 0';
+            gameOverText.style.display = 'none';
+            startGame();
+        }
+
+        // Listen for the restart event
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Enter' && gameOverText.style.display === 'block') {
+                restartGame();
+            }
+        });
+
+        // Start the game when the page loads
+        window.onload = startGame;
+
+    </script>
+</body>
+</html>
