@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex FPS Game</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 10px; left: 10px; color: white; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <p id="health">Health: 100</p>
+        <p id="ammo">Ammo: 10</p>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, clock, raycaster, controls, bullets = [];
+        let player, bulletSpeed = 0.5, bulletMaterial, enemy, health = 100, ammo = 10;
+        let keys = { forward: false, backward: false, left: false, right: false, shoot: false };
+        let mouseX = 0, mouseY = 0;
+        let enemies = [];
+        let lastFireTime = 0, fireCooldown = 500; // 500ms cooldown
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Create player
+            player = new THREE.Object3D();
+            scene.add(player);
+
+            // Add ground
+            const ground = new THREE.Mesh(
+                new THREE.PlaneGeometry(100, 100),
+                new THREE.MeshBasicMaterial({ color: 0xaaaaaa, side: THREE.DoubleSide })
+            );
+            ground.rotation.x = Math.PI / -2;
+            scene.add(ground);
+
+            // Add walls
+            createWall(5, 0, -10, 10, 10);
+            createWall(-5, 0, 10, 10, 10);
+
+            // Add a target cube (enemy)
+            createEnemy(10, 0.5, -5);
+
+            // Add light
+            const light = new THREE.AmbientLight(0x404040, 1);
+            scene.add(light);
+
+            // Raycaster for shooting
+            raycaster = new THREE.Raycaster();
+            clock = new THREE.Clock();
+
+            // Event listeners for player movement and mouse look
+            document.addEventListener('keydown', (event) => handleKeyDown(event), false);
+            document.addEventListener('keyup', (event) => handleKeyUp(event), false);
+            document.addEventListener('mousemove', (event) => handleMouseMove(event), false);
+            document.addEventListener('click', shootBullet, false);
+
+            // Bullet material
+            bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+            // Resize handling
+            window.addEventListener('resize', onWindowResize, false);
+
+            camera.position.set(0, 1.6, 0); // Set camera height to 1.6m for first-person perspective
+        }
+
+        function createWall(x, y, z, width, height) {
+            const wall = new THREE.Mesh(
+                new THREE.PlaneGeometry(width, height),
+                new THREE.MeshBasicMaterial({ color: 0x0000ff, side: THREE.DoubleSide })
+            );
+            wall.position.set(x, y, z);
+            scene.add(wall);
+        }
+
+        function createEnemy(x, y, z) {
+            enemy = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshBasicMaterial({ color: 0xff0000 })
+            );
+            enemy.position.set(x, y, z);
+            enemies.push(enemy);
+            scene.add(enemy);
+        }
+
+        // Handle key events for movement
+        function handleKeyDown(event) {
+            switch (event.code) {
+                case 'KeyW': keys.forward = true; break;
+                case 'KeyS': keys.backward = true; break;
+                case 'KeyA': keys.left = true; break;
+                case 'KeyD': keys.right = true; break;
+            }
+        }
+
+        function handleKeyUp(event) {
+            switch (event.code) {
+                case 'KeyW': keys.forward = false; break;
+                case 'KeyS': keys.backward = false; break;
+                case 'KeyA': keys.left = false; break;
+                case 'KeyD': keys.right = false; break;
+            }
+        }
+
+        // Mouse look control
+        function handleMouseMove(event) {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            camera.rotation.set(mouseY * Math.PI / 4, mouseX * Math.PI / 4, 0);
+        }
+
+        // Update player movement
+        function movePlayer() {
+            const speed = 0.1;
+            if (keys.forward) player.position.z -= speed;
+            if (keys.backward) player.position.z += speed;
+            if (keys.left) player.position.x -= speed;
+            if (keys.right) player.position.x += speed;
+        }
+
+        // Shoot a bullet
+        function shootBullet() {
+            if (ammo <= 0 || Date.now() - lastFireTime < fireCooldown) return; // Check ammo and fire rate
+            ammo--;
+            document.getElementById('ammo').innerText = "Ammo: " + ammo;
+
+            const bullet = new THREE.Mesh(new THREE.SphereGeometry(0.1), bulletMaterial);
+            bullet.position.set(camera.position.x, camera.position.y, camera.position.z);
+            const direction = new THREE.Vector3(0, 0, -1).applyMatrix4(camera.matrixWorld);
+            bullet.velocity = direction.multiplyScalar(bulletSpeed);
+            scene.add(bullet);
+            bullets.push(bullet);
+            lastFireTime = Date.now();
+        }
+
+        // Update bullets
+        function updateBullets() {
+            for (let i = 0; i < bullets.length; i++) {
+                let bullet = bullets[i];
+                bullet.position.add(bullet.velocity);
+
+                // Check if bullet hits the enemy
+                if (bullet.position.distanceTo(enemy.position) < 1) {
+                    scene.remove(enemy); // Destroy enemy
+                    bullets.splice(i, 1); // Remove bullet from array
+                    scene.remove(bullet); // Remove bullet from scene
+                    health -= 10; // Damage player
+                    document.getElementById('health').innerText = "Health: " + health;
+                    i--;
+                }
+            }
+        }
+
+        // Update enemies (basic AI)
+        function updateEnemies() {
+            enemies.forEach(enemy => {
+                // Simple logic for moving the enemy back and forth
+                enemy.position.z += Math.sin(Date.now() * 0.001) * 0.05;
+            });
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Main animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            movePlayer();
+            updateBullets();
+            updateEnemies();
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
