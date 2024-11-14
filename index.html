@@ -6,7 +6,6 @@
     <title>Complex Incremental Clicker Game with Microtransactions</title>
     <style>
         /* Your original styles remain here */
-
         .disabled {
             background-color: #cccccc;
             cursor: not-allowed;
@@ -82,10 +81,13 @@
         let premiumCredits = 0;
         let autoClickerInterval = null;
 
-        // Update the score on the screen
+        // Update the score and UI on the screen
         function updateScore() {
             document.getElementById("score").innerText = "Score: " + score;
             document.getElementById("premiumCredits").innerText = premiumCredits;
+            document.getElementById("clickUpgradeInfo").innerText = `Current Click Power: ${clickPower}`;
+            document.getElementById("autoClickerInfo").innerText = `Auto-clicker: ${autoClickerRate} points per second`;
+            document.getElementById("multiplierInfo").innerText = `Multiplier: ${multiplier}x`;
 
             // Update buttons' enabled/disabled state
             document.getElementById("upgradeClick").disabled = score < 50;
@@ -107,7 +109,7 @@
 
         // Auto-clicker that increases the score over time
         function startAutoClicker() {
-            if (autoClickerInterval) return;
+            if (autoClickerInterval) return; // Only start once
             autoClickerInterval = setInterval(() => {
                 score += autoClickerRate * multiplier;
                 updateScore();
@@ -121,6 +123,8 @@
                 score -= cost;
                 clickPower += 1;
                 updateScore();
+            } else {
+                alert("You do not have enough score to buy Click Upgrade!");
             }
         }
 
@@ -131,7 +135,9 @@
                 score -= cost;
                 autoClickerRate += 1;
                 updateScore();
-                startAutoClicker();
+                startAutoClicker(); // Starts auto-clicking when bought
+            } else {
+                alert("You do not have enough score to buy Auto-Clicker!");
             }
         }
 
@@ -142,6 +148,8 @@
                 score -= cost;
                 multiplier *= 2; // Double the multiplier each time
                 updateScore();
+            } else {
+                alert("You do not have enough score to buy Multiplier!");
             }
         }
 
@@ -154,6 +162,8 @@
                 autoClickerRate = 0;
                 multiplier = 1;
                 updateScore();
+            } else {
+                alert("You do not have enough score to prestige!");
             }
         }
 
@@ -232,6 +242,10 @@
             document.getElementById("adminPanel").style.display = "none";
             document.getElementById("adminCode").disabled = false;
         }
+
+        // Initialize the game state
+        updateScore();
+
     </script>
 </body>
 </html>
