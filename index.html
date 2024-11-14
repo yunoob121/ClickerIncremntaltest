@@ -99,6 +99,13 @@
         .microtransaction-button:hover {
             background-color: #7b1fa2;
         }
+        .premium-shop {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .premium-item {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -129,6 +136,20 @@
             <p>Premium Credits: <span id="premiumCredits">0</span></p>
             <button class="microtransaction-button" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
         </div>
+        
+        <!-- Premium Shop -->
+        <div class="premium-shop">
+            <h3>Premium Shop</h3>
+            <div class="premium-item">
+                <button class="microtransaction-button" onclick="instantScoreBoost()" disabled>Instant Score Boost (Cost: 50 Premium Credits)</button>
+            </div>
+            <div class="premium-item">
+                <button class="microtransaction-button" onclick="boostAutoClicker()" disabled>Speed Up Auto-Clicker (Cost: 100 Premium Credits)</button>
+            </div>
+            <div class="premium-item">
+                <button class="microtransaction-button" onclick="boostMultiplier()" disabled>Multiplier Boost (Cost: 200 Premium Credits)</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -140,6 +161,8 @@
         let autoClickerInterval = null;
         let prestigeCost = 1000;
         let premiumCredits = 0; // Virtual currency
+        let autoClickerBoostDuration = 0; // Auto-clicker speed boost timer
+        let multiplierBoostDuration = 0; // Multiplier boost timer
 
         // Update the score on the screen
         function updateScore() {
@@ -228,19 +251,56 @@
             premiumCredits += 100;
             document.getElementById("premiumCredits").innerText = premiumCredits;
             alert("You have successfully purchased 100 Premium Credits!");
+            updatePremiumShop();
         }
 
-        // Use Premium Credits to buy points
-        function buyWithCredits() {
-            if (premiumCredits >= 100) {
-                premiumCredits -= 100;
-                score += 1000; // Get 1000 points for 100 credits
+        // Instant score boost using premium credits
+        function instantScoreBoost() {
+            if (premiumCredits >= 50) {
+                premiumCredits -= 50;
+                score += 500; // Boost the score by 500 points
                 document.getElementById("premiumCredits").innerText = premiumCredits;
                 updateScore();
-                alert("You purchased 1000 points with 100 Premium Credits!");
+                alert("You boosted your score by 500 points!");
+                updatePremiumShop();
             } else {
                 alert("You do not have enough Premium Credits!");
             }
+        }
+
+        // Speed up auto-clicker using premium credits
+        function boostAutoClicker() {
+            if (premiumCredits >= 100) {
+                premiumCredits -= 100;
+                autoClickerRate += 2; // Increase auto-clicker rate by 2 points per second
+                document.getElementById("premiumCredits").innerText = premiumCredits;
+                updateScore();
+                alert("Your auto-clicker speed has been boosted!");
+                updatePremiumShop();
+            } else {
+                alert("You do not have enough Premium Credits!");
+            }
+        }
+
+        // Multiplier boost using premium credits
+        function boostMultiplier() {
+            if (premiumCredits >= 200) {
+                premiumCredits -= 200;
+                multiplier *= 1.5; // Increase multiplier by 1.5x
+                document.getElementById("premiumCredits").innerText = premiumCredits;
+                updateScore();
+                alert("Your multiplier has been boosted!");
+                updatePremiumShop();
+            } else {
+                alert("You do not have enough Premium Credits!");
+            }
+        }
+
+        // Update the premium shop buttons based on available premium credits
+        function updatePremiumShop() {
+            document.querySelectorAll(".microtransaction-button").forEach(button => {
+                button.disabled = premiumCredits < parseInt(button.innerText.match(/\d+/)[0]);
+            });
         }
 
         // Keep the buttons updated based on available score
@@ -253,6 +313,7 @@
 
         // Initial setup
         updateScore();
+        updatePremiumShop();
     </script>
 </body>
 </html>
