@@ -20,12 +20,13 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            max-width: 600px;
+            position: relative;
         }
         h1 {
             color: #333;
         }
-        .score, .auto-clicker, .upgrade {
+        .score, .auto-clicker, .upgrade, .currency-info {
             font-size: 20px;
             margin-top: 20px;
         }
@@ -106,11 +107,50 @@
         .premium-item {
             margin-bottom: 10px;
         }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            text-align: left;
+        }
+        .admin-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .admin-button:hover {
+            background-color: #e53935;
+        }
+
+        /* Shop Panel */
+        .shop-panel {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .shop-item {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Complex Incremental Clicker Game</h1>
+        
+        <!-- Click Me Button -->
         <button class="click-button" id="clickButton" onclick="clickButton()">Click Me!</button>
         <div class="score" id="score">Score: 0</div>
         <div class="auto-clicker" id="autoClicker">Auto-clicker Level: 0</div>
@@ -131,12 +171,12 @@
             <div class="prestige-info" id="prestigeInfo">Prestiges: 0 | Current Multiplier: 1x</div>
         </div>
         
-        <!-- Virtual Currency Section -->
+        <!-- Premium Currency Section -->
         <div class="currency-info">
             <p>Premium Credits: <span id="premiumCredits">0</span></p>
             <button class="microtransaction-button" id="purchaseCredits" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
         </div>
-        
+
         <!-- Premium Shop -->
         <div class="premium-shop">
             <h3>Premium Shop</h3>
@@ -150,6 +190,21 @@
                 <button class="microtransaction-button" id="boostMultiplier" onclick="boostMultiplier()" disabled>Multiplier Boost (Cost: 200 Premium Credits)</button>
             </div>
         </div>
+
+        <!-- Admin Panel Access -->
+        <div>
+            <input type="text" id="adminCode" placeholder="Enter Admin Code">
+            <button onclick="checkAdminCode()">Submit</button>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="admin-panel" id="adminPanel">
+            <h2>Admin Panel</h2>
+            <button class="admin-button" onclick="forceGiveMoney()">Force Give 10000 Score</button>
+            <button class="admin-button" onclick="buyAllUpgrades()">Buy All Upgrades</button>
+            <button class="admin-button" onclick="increaseSpeed()">Increase Game Speed</button>
+            <button class="admin-button" onclick="resetAdminPanel()">Close Admin Panel</button>
+        </div>
     </div>
 
     <script>
@@ -157,12 +212,8 @@
         let clickPower = 1;
         let autoClickerRate = 0;
         let multiplier = 1;
-        let prestigeCount = 0;
-        let autoClickerInterval = null;
-        let prestigeCost = 1000;
         let premiumCredits = 0; // Virtual currency
-        let autoClickerBoostDuration = 0; // Auto-clicker speed boost timer
-        let multiplierBoostDuration = 0; // Multiplier boost timer
+        let autoClickerInterval = null;
 
         // Update the score on the screen
         function updateScore() {
@@ -191,7 +242,6 @@
                 score -= cost;
                 clickPower += 1;
                 updateScore();
-                document.getElementById("clickUpgradeInfo").innerText = `Current Click Power: ${clickPower}`;
             }
         }
 
@@ -202,9 +252,7 @@
                 score -= cost;
                 autoClickerRate += 1;
                 updateScore();
-                document.getElementById("autoClickerInfo").innerText = `Auto-clicker: ${autoClickerRate} points per second`;
                 startAutoClicker();
-                document.getElementById("upgradeAutoClick").disabled = true;
             }
         }
 
@@ -215,54 +263,35 @@
                 score -= cost;
                 multiplier *= 2; // Double the multiplier each time
                 updateScore();
-                document.getElementById("multiplierInfo").innerText = `Multiplier: ${multiplier}x`;
             }
         }
 
         // Function to handle the prestige system
         function prestige() {
-            const cost = prestigeCost;
+            const cost = 1000;
             if (score >= cost) {
                 score = 0;
                 clickPower = 1;
                 autoClickerRate = 0;
                 multiplier = 1;
-                prestigeCount += 1;
-                prestigeCost *= 2; // Double the prestige cost after each prestige
                 updateScore();
-                document.getElementById("prestigeInfo").innerText = `Prestiges: ${prestigeCount} | Current Multiplier: ${multiplier}x`;
-                resetGame();
             }
-        }
-
-        // Reset game settings after prestige
-        function resetGame() {
-            clearInterval(autoClickerInterval);
-            autoClickerInterval = null;
-            document.getElementById("upgradeClick").disabled = false;
-            document.getElementById("upgradeAutoClick").disabled = false;
-            document.getElementById("upgradeMultiplier").disabled = false;
-            document.getElementById("prestigeButton").disabled = score < prestigeCost;
         }
 
         // Virtual currency system: Simulate a purchase
         function purchaseCredits() {
-            // Simulating a purchase of 100 premium credits
             premiumCredits += 100;
             document.getElementById("premiumCredits").innerText = premiumCredits;
             alert("You have successfully purchased 100 Premium Credits!");
-            updatePremiumShop();
         }
 
         // Instant score boost using premium credits
         function instantScoreBoost() {
             if (premiumCredits >= 50) {
                 premiumCredits -= 50;
-                score += 500; // Boost the score by 500 points
+                score += 500;
                 document.getElementById("premiumCredits").innerText = premiumCredits;
                 updateScore();
-                alert("You boosted your score by 500 points!");
-                updatePremiumShop();
             } else {
                 alert("You do not have enough Premium Credits!");
             }
@@ -272,11 +301,9 @@
         function boostAutoClicker() {
             if (premiumCredits >= 100) {
                 premiumCredits -= 100;
-                autoClickerRate += 2; // Increase auto-clicker rate by 2 points per second
+                autoClickerRate += 2;
                 document.getElementById("premiumCredits").innerText = premiumCredits;
                 updateScore();
-                alert("Your auto-clicker speed has been boosted!");
-                updatePremiumShop();
             } else {
                 alert("You do not have enough Premium Credits!");
             }
@@ -286,34 +313,49 @@
         function boostMultiplier() {
             if (premiumCredits >= 200) {
                 premiumCredits -= 200;
-                multiplier *= 1.5; // Increase multiplier by 1.5x
+                multiplier *= 1.5;
                 document.getElementById("premiumCredits").innerText = premiumCredits;
                 updateScore();
-                alert("Your multiplier has been boosted!");
-                updatePremiumShop();
             } else {
                 alert("You do not have enough Premium Credits!");
             }
         }
 
-        // Update the premium shop buttons based on available premium credits
-        function updatePremiumShop() {
-            document.getElementById("instantScoreBoost").disabled = premiumCredits < 50;
-            document.getElementById("boostAutoClicker").disabled = premiumCredits < 100;
-            document.getElementById("boostMultiplier").disabled = premiumCredits < 200;
+        // Admin Panel code entry
+        function checkAdminCode() {
+            const adminCode = document.getElementById("adminCode").value;
+            if (adminCode === "admin!") {
+                document.getElementById("adminPanel").style.display = "block";
+                document.getElementById("adminCode").disabled = true;
+            } else {
+                alert("Incorrect Admin Code");
+            }
         }
 
-        // Keep the buttons updated based on available score
-        setInterval(() => {
-            document.getElementById("upgradeClick").disabled = score < 50;
-            document.getElementById("upgradeAutoClick").disabled = score < 100 || autoClickerRate > 0;
-            document.getElementById("upgradeMultiplier").disabled = score < 500;
-            document.getElementById("prestigeButton").disabled = score < prestigeCost;
-        }, 100);
+        // Admin Panel Functions
+        function forceGiveMoney() {
+            score += 10000;
+            updateScore();
+        }
 
-        // Initial setup
-        updateScore();
-        updatePremiumShop();
+        function buyAllUpgrades() {
+            clickPower = 100;
+            autoClickerRate = 100;
+            multiplier = 100;
+            score = 1000000;
+            updateScore();
+        }
+
+        function increaseSpeed() {
+            clearInterval(autoClickerInterval);
+            startAutoClicker();
+            alert("Game speed increased!");
+        }
+
+        function resetAdminPanel() {
+            document.getElementById("adminPanel").style.display = "none";
+            document.getElementById("adminCode").disabled = false;
+        }
     </script>
 </body>
 </html>
