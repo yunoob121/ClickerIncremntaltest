@@ -17,6 +17,7 @@
             display: block;
             background-color: #f4f4f4;
             margin: 0 auto;
+            position: relative;
         }
 
         #score {
@@ -31,7 +32,8 @@
         .dino {
             width: 44px;
             height: 47px;
-            background-color: #4CAF50;
+            background-image: url('https://img.icons8.com/ios/452/google-t-rex.png'); /* Replace with your T-Rex image */
+            background-size: cover;
             position: absolute;
             bottom: 50px;
             left: 50px;
@@ -40,7 +42,8 @@
         .obstacle {
             width: 30px;
             height: 30px;
-            background-color: #333;
+            background-image: url('https://img.icons8.com/ios/452/cactus.png'); /* Replace with your cactus image */
+            background-size: cover;
             position: absolute;
             bottom: 50px;
         }
@@ -83,8 +86,9 @@
         let score = 0;
         let isJumping = false;
         let gameInterval;
-        let obstacleSpeed = 2;
+        let obstacleSpeed = 2; // Initial speed for obstacles
         let obstacles = [];
+        let jumpHeight = 100; // Jump height in pixels
         
         // Dino Jumping Function
         function jump() {
@@ -102,13 +106,12 @@
         function createObstacle() {
             let obstacle = document.createElement('div');
             obstacle.classList.add('obstacle');
-            obstacle.style.left = '100vw';
-            obstacle.style.bottom = '50px';
+            obstacle.style.left = '100vw'; // Position at the far right of the canvas
             gameCanvas.appendChild(obstacle);
             obstacles.push(obstacle);
         }
 
-        // Move Obstacles
+        // Move Obstacles and Check for Collisions
         function moveObstacles() {
             for (let i = 0; i < obstacles.length; i++) {
                 let obstacle = obstacles[i];
@@ -125,7 +128,7 @@
                     return;
                 }
 
-                // Move obstacle to the left
+                // Move the obstacle to the left
                 if (obstaclePosition.left > 0) {
                     obstacle.style.left = obstaclePosition.left - obstacleSpeed + 'px';
                 } else {
@@ -134,6 +137,11 @@
                     score++;
                     scoreDisplay.textContent = 'Score: ' + score;
                 }
+            }
+
+            // Increase difficulty (speed up) every 1000 points
+            if (score % 100 === 0 && score > 0) {
+                obstacleSpeed += 0.5; // Increase the obstacle speed
             }
         }
 
@@ -156,7 +164,7 @@
                 moveObstacles();
             }, 20);
             
-            setInterval(createObstacle, 2000); // Create obstacle every 2 seconds
+            setInterval(createObstacle, 2000); // Create a new obstacle every 2 seconds
         }
 
         // Restart the Game
