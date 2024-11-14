@@ -111,7 +111,7 @@
 <body>
     <div class="container">
         <h1>Complex Incremental Clicker Game</h1>
-        <button class="click-button" onclick="clickButton()">Click Me!</button>
+        <button class="click-button" id="clickButton" onclick="clickButton()">Click Me!</button>
         <div class="score" id="score">Score: 0</div>
         <div class="auto-clicker" id="autoClicker">Auto-clicker Level: 0</div>
         <div class="upgrade">
@@ -134,20 +134,20 @@
         <!-- Virtual Currency Section -->
         <div class="currency-info">
             <p>Premium Credits: <span id="premiumCredits">0</span></p>
-            <button class="microtransaction-button" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
+            <button class="microtransaction-button" id="purchaseCredits" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
         </div>
         
         <!-- Premium Shop -->
         <div class="premium-shop">
             <h3>Premium Shop</h3>
             <div class="premium-item">
-                <button class="microtransaction-button" onclick="instantScoreBoost()" disabled>Instant Score Boost (Cost: 50 Premium Credits)</button>
+                <button class="microtransaction-button" id="instantScoreBoost" onclick="instantScoreBoost()" disabled>Instant Score Boost (Cost: 50 Premium Credits)</button>
             </div>
             <div class="premium-item">
-                <button class="microtransaction-button" onclick="boostAutoClicker()" disabled>Speed Up Auto-Clicker (Cost: 100 Premium Credits)</button>
+                <button class="microtransaction-button" id="boostAutoClicker" onclick="boostAutoClicker()" disabled>Speed Up Auto-Clicker (Cost: 100 Premium Credits)</button>
             </div>
             <div class="premium-item">
-                <button class="microtransaction-button" onclick="boostMultiplier()" disabled>Multiplier Boost (Cost: 200 Premium Credits)</button>
+                <button class="microtransaction-button" id="boostMultiplier" onclick="boostMultiplier()" disabled>Multiplier Boost (Cost: 200 Premium Credits)</button>
             </div>
         </div>
     </div>
@@ -298,9 +298,9 @@
 
         // Update the premium shop buttons based on available premium credits
         function updatePremiumShop() {
-            document.querySelectorAll(".microtransaction-button").forEach(button => {
-                button.disabled = premiumCredits < parseInt(button.innerText.match(/\d+/)[0]);
-            });
+            document.getElementById("instantScoreBoost").disabled = premiumCredits < 50;
+            document.getElementById("boostAutoClicker").disabled = premiumCredits < 100;
+            document.getElementById("boostMultiplier").disabled = premiumCredits < 200;
         }
 
         // Keep the buttons updated based on available score
