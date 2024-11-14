@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Incremental Clicker Game with Microtransactions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+        }
+        .score, .auto-clicker, .upgrade {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        .click-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+        .click-button:hover {
+            background-color: #45a049;
+        }
+        .upgrade-button {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .upgrade-button:hover {
+            background-color: #e68900;
+        }
+        .disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .purchase-info {
+            font-size: 16px;
+            color: #777;
+        }
+        .prestige-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+        .prestige-button:hover {
+            background-color: #1a75d1;
+        }
+        .prestige-info {
+            font-size: 16px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .currency-info {
+            font-size: 18px;
+            margin-top: 15px;
+            color: #ff5722;
+        }
+        .microtransaction-button {
+            background-color: #9C27B0;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .microtransaction-button:hover {
+            background-color: #7b1fa2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Complex Incremental Clicker Game</h1>
+        <button class="click-button" onclick="clickButton()">Click Me!</button>
+        <div class="score" id="score">Score: 0</div>
+        <div class="auto-clicker" id="autoClicker">Auto-clicker Level: 0</div>
+        <div class="upgrade">
+            <button class="upgrade-button" id="upgradeClick" onclick="buyClickUpgrade()">Upgrade Click Power (Cost: 50)</button>
+            <div class="purchase-info" id="clickUpgradeInfo">Current Click Power: 1</div>
+        </div>
+        <div class="upgrade">
+            <button class="upgrade-button" id="upgradeAutoClick" onclick="buyAutoClicker()" disabled>Buy Auto-Clicker (Cost: 100)</button>
+            <div class="purchase-info" id="autoClickerInfo">Auto-clicker: 0 points per second</div>
+        </div>
+        <div class="upgrade">
+            <button class="upgrade-button" id="upgradeMultiplier" onclick="buyMultiplier()" disabled>Buy Multiplier (Cost: 500)</button>
+            <div class="purchase-info" id="multiplierInfo">Multiplier: 1x</div>
+        </div>
+        <div class="prestige">
+            <button class="prestige-button" id="prestigeButton" onclick="prestige()" disabled>Prestige (Cost: 1000)</button>
+            <div class="prestige-info" id="prestigeInfo">Prestiges: 0 | Current Multiplier: 1x</div>
+        </div>
+        
+        <!-- Virtual Currency Section -->
+        <div class="currency-info">
+            <p>Premium Credits: <span id="premiumCredits">0</span></p>
+            <button class="microtransaction-button" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let clickPower = 1;
+        let autoClickerRate = 0;
+        let multiplier = 1;
+        let prestigeCount = 0;
+        let autoClickerInterval = null;
+        let prestigeCost = 1000;
+        let premiumCredits = 0; // Virtual currency
+
+        // Update the score on the screen
+        function updateScore() {
+            document.getElementById("score").innerText = "Score: " + score;
+        }
+
+        // Function for when you click the main button
+        function clickButton() {
+            score += clickPower * multiplier;
+            updateScore();
+        }
+
+        // Auto-clicker that increases the score over time
+        function startAutoClicker() {
+            if (autoClickerInterval) return;
+            autoClickerInterval = setInterval(() => {
+                score += autoClickerRate * multiplier;
+                updateScore();
+            }, 1000);
+        }
+
+        // Function to handle the upgrade for click power
+        function buyClickUpgrade() {
+            const cost = 50;
+            if (score >= cost) {
+                score -= cost;
+                clickPower += 1;
+                updateScore();
+                document.getElementById("clickUpgradeInfo").innerText = `Current Click Power: ${clickPower}`;
+            }
+        }
+
+        // Function to handle buying the auto-clicker upgrade
+        function buyAutoClicker() {
+            const cost = 100;
+            if (score >= cost) {
+                score -= cost;
+                autoClickerRate += 1;
+                updateScore();
+                document.getElementById("autoClickerInfo").innerText = `Auto-clicker: ${autoClickerRate} points per second`;
+                startAutoClicker();
+                document.getElementById("upgradeAutoClick").disabled = true;
+            }
+        }
+
+        // Function to handle buying the multiplier upgrade
+        function buyMultiplier() {
+            const cost = 500;
+            if (score >= cost) {
+                score -= cost;
+                multiplier *= 2; // Double the multiplier each time
+                updateScore();
+                document.getElementById("multiplierInfo").innerText = `Multiplier: ${multiplier}x`;
+            }
+        }
+
+        // Function to handle the prestige system
+        function prestige() {
+            const cost = prestigeCost;
+            if (score >= cost) {
+                score = 0;
+                clickPower = 1;
+                autoClickerRate = 0;
+                multiplier = 1;
+                prestigeCount += 1;
+                prestigeCost *= 2; // Double the prestige cost after each prestige
+                updateScore();
+                document.getElementById("prestigeInfo").innerText = `Prestiges: ${prestigeCount} | Current Multiplier: ${multiplier}x`;
+                resetGame();
+            }
+        }
+
+        // Reset game settings after prestige
+        function resetGame() {
+            clearInterval(autoClickerInterval);
+            autoClickerInterval = null;
+            document.getElementById("upgradeClick").disabled = false;
+            document.getElementById("upgradeAutoClick").disabled = false;
+            document.getElementById("upgradeMultiplier").disabled = false;
+            document.getElementById("prestigeButton").disabled = score < prestigeCost;
+        }
+
+        // Virtual currency system: Simulate a purchase
+        function purchaseCredits() {
+            // Simulating a purchase of 100 premium credits
+            premiumCredits += 100;
+            document.getElementById("premiumCredits").innerText = premiumCredits;
+            alert("You have successfully purchased 100 Premium Credits!");
+        }
+
+        // Use Premium Credits to buy points
+        function buyWithCredits() {
+            if (premiumCredits >= 100) {
+                premiumCredits -= 100;
+                score += 1000; // Get 1000 points for 100 credits
+                document.getElementById("premiumCredits").innerText = premiumCredits;
+                updateScore();
+                alert("You purchased 1000 points with 100 Premium Credits!");
+            } else {
+                alert("You do not have enough Premium Credits!");
+            }
+        }
+
+        // Keep the buttons updated based on available score
+        setInterval(() => {
+            document.getElementById("upgradeClick").disabled = score < 50;
+            document.getElementById("upgradeAutoClick").disabled = score < 100 || autoClickerRate > 0;
+            document.getElementById("upgradeMultiplier").disabled = score < 500;
+            document.getElementById("prestigeButton").disabled = score < prestigeCost;
+        }, 100);
+
+        // Initial setup
+        updateScore();
+    </script>
+</body>
+</html>
