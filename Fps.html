@@ -28,34 +28,45 @@
         animate();
 
         function init() {
+            // Create the scene
             scene = new THREE.Scene();
+
+            // Set up the camera (Field of View, Aspect Ratio, Near and Far Clipping Planes)
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            // Create the WebGLRenderer and set its size
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Create player
+            // Add ambient light to the scene (everything will be lit evenly)
+            const light = new THREE.AmbientLight(0x404040, 2); // 2 is intensity
+            scene.add(light);
+
+            // Create a directional light to simulate sunlight
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(0, 10, 10).normalize();
+            scene.add(dirLight);
+
+            // Add a basic cube player
             player = new THREE.Object3D();
+            player.position.set(0, 1.6, 0); // Set player height to 1.6m
             scene.add(player);
 
-            // Add ground
+            // Add a simple ground plane
             const ground = new THREE.Mesh(
                 new THREE.PlaneGeometry(100, 100),
-                new THREE.MeshBasicMaterial({ color: 0xaaaaaa, side: THREE.DoubleSide })
+                new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
             );
-            ground.rotation.x = Math.PI / -2;
+            ground.rotation.x = Math.PI / -2; // Rotate the plane to lie flat
             scene.add(ground);
 
-            // Add walls
+            // Create a simple wall object
             createWall(5, 0, -10, 10, 10);
             createWall(-5, 0, 10, 10, 10);
 
-            // Add a target cube (enemy)
+            // Add a simple enemy (red cube)
             createEnemy(10, 0.5, -5);
-
-            // Add light
-            const light = new THREE.AmbientLight(0x404040, 1);
-            scene.add(light);
 
             // Raycaster for shooting
             raycaster = new THREE.Raycaster();
@@ -72,8 +83,6 @@
 
             // Resize handling
             window.addEventListener('resize', onWindowResize, false);
-
-            camera.position.set(0, 1.6, 0); // Set camera height to 1.6m for first-person perspective
         }
 
         function createWall(x, y, z, width, height) {
