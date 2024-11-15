@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker Game</title>
+    <title>Clicker Game with Save State and Leaderboard</title>
     <style>
         body {
             display: flex;
@@ -14,10 +14,10 @@
             background-color: #f5f5f5;
             font-family: Arial, sans-serif;
             overflow: hidden;
+            flex-direction: column;
         }
 
         .container {
-            position: relative;
             text-align: center;
         }
 
@@ -30,6 +30,7 @@
             cursor: pointer;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         .click-button:hover {
@@ -61,16 +62,51 @@
             font-size: 32px;
             color: #333;
         }
+
+        .leaderboard {
+            margin-top: 40px;
+            font-size: 18px;
+        }
+
+        .leaderboard h2 {
+            margin-bottom: 10px;
+        }
+
+        .leaderboard ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .leaderboard li {
+            padding: 5px 0;
+        }
+
+        .leaderboard li span {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <button class="click-button" id="clickButton" onclick="clickButton()">Click Me!</button>
         <div class="score" id="score">Score: 0</div>
+
+        <div class="leaderboard">
+            <h2>Leaderboard</h2>
+            <ul id="leaderboardList">
+                <li>Loading...</li>
+            </ul>
+        </div>
+
+        <div>
+            <button class="click-button" onclick="saveGame()">Save Game</button>
+            <button class="click-button" onclick="loadGame()">Load Game</button>
+        </div>
     </div>
 
     <script>
         let score = 0;
+        let lastSavedTime = new Date().getTime(); // Track last save time
 
         // Function for the click action
         function clickButton() {
@@ -91,7 +127,7 @@
         function createFloatingNumber(number) {
             const floatingNumber = document.createElement("div");
             floatingNumber.classList.add("number");
-            floatingNumber.innerText = `+${number}`;
+            floatingNumber.innerText = `+1`;
 
             // Position the floating number at the center of the button
             const button = document.getElementById("clickButton");
@@ -109,6 +145,76 @@
                 floatingNumber.remove();
             }, 1500); // Matches the animation duration
         }
+
+        // Save game state to localStorage
+        function saveGame() {
+            const gameState = {
+                score: score,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+            alert("Game saved!");
+        }
+
+        // Load game state from localStorage
+        function loadGame() {
+            const savedState = localStorage.getItem('gameState');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                score = gameState.score;
+                lastSavedTime = gameState.timestamp;
+                updateScore();
+                alert("Game loaded!");
+            } else {
+                alert("No saved game found.");
+            }
+        }
+
+        // Leaderboard management
+        function updateLeaderboard() {
+            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+            // Check if the current score should be added to the leaderboard
+            if (leaderboard.length < 5 || score > leaderboard[leaderboard.length - 1].score) {
+                leaderboard.push({ score: score, timestamp: new Date().getTime() });
+                leaderboard.sort((a, b) => b.score - a.score); // Sort by score in descending order
+
+                // Limit to top 5 scores
+                leaderboard = leaderboard.slice(0, 5);
+                localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            }
+
+            // Display leaderboard
+            const leaderboardList = document.getElementById("leaderboardList");
+            leaderboardList.innerHTML = ''; // Clear the leaderboard list
+
+            leaderboard.forEach(entry => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span>${entry.score}</span> - ${new Date(entry.timestamp).toLocaleTimeString()}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // Update leaderboard every minute
+        setInterval(updateLeaderboard, 60000); // Every minute (60000 ms)
+
+        // Initialize the game and leaderboard
+        function initGame() {
+            // Update the score display from saved game state
+            const savedState = localStorage.getItem('gameState');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                score = gameState.score;
+                updateScore();
+            }
+
+            // Update the leaderboard
+            updateLeaderboard();
+        }
+
+        // Initialize the game on page load
+        window.onload = initGame;
+
     </script>
 </body>
 </html>
