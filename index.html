@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complex Incremental Clicker Game with Microtransactions</title>
     <style>
-        /* Body and general styles */
+        /* Styles as before */
         body {
             font-family: Arial, sans-serif;
             background: url('https://www.example.com/background-image.jpg') no-repeat center center fixed;
@@ -243,6 +243,12 @@
         </div>
     </div>
 
+    <!-- Sound Effects -->
+    <audio id="clickSound" src="click-sound.mp3"></audio>
+    <audio id="upgradeSound" src="upgrade-sound.mp3"></audio>
+    <audio id="premiumSound" src="premium-sound.mp3"></audio>
+    <audio id="prestigeSound" src="prestige-sound.mp3"></audio>
+
     <script>
         let score = 0;
         let clickPower = 1;
@@ -251,6 +257,12 @@
         let premiumCredits = 0;
         let autoClickerInterval = null;
 
+        // Play sound when an action occurs
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            sound.play();
+        }
+
         // Update the score and UI on the screen
         function updateScore() {
             document.getElementById("score").innerText = "Score: " + score;
@@ -258,6 +270,7 @@
             document.getElementById("clickUpgradeInfo").innerText = `Current Click Power: ${clickPower}`;
             document.getElementById("autoClickerInfo").innerText = `Auto-clicker: ${autoClickerRate} points per second`;
             document.getElementById("multiplierInfo").innerText = `Multiplier: ${multiplier}x`;
+            playSound("clickSound");  // Play click sound when score updates
 
             // Update buttons' enabled/disabled state
             document.getElementById("upgradeClick").disabled = score < 50;
@@ -275,15 +288,7 @@
         function clickButton() {
             score += clickPower * multiplier;
             updateScore();
-        }
-
-        // Auto-clicker that increases the score over time
-        function startAutoClicker() {
-            if (autoClickerInterval) return; // Only start once
-            autoClickerInterval = setInterval(() => {
-                score += autoClickerRate * multiplier;
-                updateScore();
-            }, 1000);
+            playSound("clickSound");
         }
 
         // Function to handle the upgrade for click power
@@ -293,6 +298,7 @@
                 score -= cost;
                 clickPower += 1;
                 updateScore();
+                playSound("upgradeSound");
             } else {
                 alert("You do not have enough score to buy Click Upgrade!");
             }
@@ -305,7 +311,8 @@
                 score -= cost;
                 autoClickerRate += 1;
                 updateScore();
-                startAutoClicker(); // Starts auto-clicking when bought
+                startAutoClicker();
+                playSound("upgradeSound");
             } else {
                 alert("You do not have enough score to buy Auto-Clicker!");
             }
@@ -316,8 +323,9 @@
             const cost = 500;
             if (score >= cost) {
                 score -= cost;
-                multiplier *= 2; // Double the multiplier each time
+                multiplier *= 2;
                 updateScore();
+                playSound("upgradeSound");
             } else {
                 alert("You do not have enough score to buy Multiplier!");
             }
@@ -327,6 +335,7 @@
         function purchaseCredits() {
             premiumCredits += 100;
             updateScore();
+            playSound("premiumSound");
             alert("You have successfully purchased 100 Premium Credits!");
         }
 
@@ -336,6 +345,7 @@
                 premiumCredits -= 50;
                 score += 500;
                 updateScore();
+                playSound("premiumSound");
             } else {
                 alert("You do not have enough Premium Credits!");
             }
@@ -347,6 +357,7 @@
                 premiumCredits -= 100;
                 autoClickerRate += 2;
                 updateScore();
+                playSound("premiumSound");
             } else {
                 alert("You do not have enough Premium Credits!");
             }
@@ -358,8 +369,24 @@
                 premiumCredits -= 200;
                 multiplier *= 1.5;
                 updateScore();
+                playSound("premiumSound");
             } else {
                 alert("You do not have enough Premium Credits!");
+            }
+        }
+
+        // Prestige function
+        function prestige() {
+            const cost = 1000;
+            if (score >= cost) {
+                score = 0;
+                clickPower = 1;
+                autoClickerRate = 0;
+                multiplier = 1;
+                updateScore();
+                playSound("prestigeSound");
+            } else {
+                alert("You do not have enough score to prestige!");
             }
         }
 
