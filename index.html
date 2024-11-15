@@ -30,16 +30,12 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        .score, .auto-clicker, .upgrade, .prestige, .currency-info, .premium-shop {
+        .score, .auto-clicker, .upgrade, .prestige, .currency-info {
             background: linear-gradient(45deg, #ff8c00, #ff6347);
             border-radius: 8px;
             padding: 10px;
             margin: 10px 0;
             transition: background 0.3s ease;
-        }
-
-        .upgrade, .prestige, .currency-info {
-            background: linear-gradient(45deg, #ff8c00, #ff6347);
         }
 
         /* Button styles */
@@ -72,46 +68,33 @@
             cursor: not-allowed;
         }
 
-        /* Animations for score and buttons */
-        @keyframes scoreBoost {
-            0% {
-                color: yellow;
-                font-size: 1.2em;
-            }
-            100% {
-                color: white;
-                font-size: 1em;
-            }
+        /* Shop section styles */
+        .shop-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
         }
 
-        #score {
-            animation: scoreBoost 0.5s ease-in-out;
+        .premium-item {
+            margin-bottom: 15px;
         }
 
-        @keyframes upgradeFlash {
-            0% {
-                background-color: #ff4500;
-            }
-            100% {
-                background-color: #4CAF50;
-            }
+        .premium-item button {
+            background-color: #ff007f;
+            font-size: 16px;
+            padding: 10px 20px;
         }
 
-        .upgrade-button:enabled {
-            animation: upgradeFlash 0.5s ease-in-out;
-        }
-
-        /* Auto-clicker animation */
-        .auto-clicker img {
-            width: 40px;
-            vertical-align: middle;
-            animation: bounce 1s infinite;
-        }
-
-        @keyframes bounce {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0); }
+        /* Admin Panel styles */
+        .admin-panel {
+            display: none;
+            background-color: #ff6347;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
         }
 
     </style>
@@ -119,7 +102,7 @@
 <body>
     <div class="container">
         <h1>Complex Incremental Clicker Game</h1>
-        
+
         <!-- Click Me Button -->
         <button class="click-button" id="clickButton" onclick="clickButton()">Click Me!</button>
         <div class="score" id="score">Score: 0</div>
@@ -140,34 +123,35 @@
             <button class="prestige-button" id="prestigeButton" onclick="prestige()">Prestige (Cost: 1000)</button>
             <div class="prestige-info" id="prestigeInfo">Prestiges: 0 | Current Multiplier: 1x</div>
         </div>
-        
+
         <!-- Premium Currency Section -->
         <div class="currency-info">
             <p>Premium Credits: <span id="premiumCredits">0</span></p>
             <button class="microtransaction-button" id="purchaseCredits" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
         </div>
 
-        <!-- Premium Shop -->
-        <div class="premium-shop">
+        <!-- Shop Toggle Button -->
+        <button id="shopToggleButton" onclick="toggleShop()">Enter Shop</button>
+
+        <!-- Premium Shop Section -->
+        <div class="shop-section" id="shopSection">
             <h3>Premium Shop</h3>
             <div class="premium-item">
                 <button class="microtransaction-button" id="instantScoreBoost" onclick="instantScoreBoost()">
-                    <img src="https://www.example.com/score-boost-icon.png" alt="Instant Score Boost" style="width: 30px; vertical-align: middle;">
                     Instant Score Boost (50 Premium Credits)
                 </button>
             </div>
             <div class="premium-item">
                 <button class="microtransaction-button" id="boostAutoClicker" onclick="boostAutoClicker()">
-                    <img src="https://www.example.com/auto-clicker-icon.png" alt="Boost Auto-Clicker" style="width: 30px; vertical-align: middle;">
                     Speed Up Auto-Clicker (100 Premium Credits)
                 </button>
             </div>
             <div class="premium-item">
                 <button class="microtransaction-button" id="boostMultiplier" onclick="boostMultiplier()">
-                    <img src="https://www.example.com/multiplier-icon.png" alt="Multiplier Boost" style="width: 30px; vertical-align: middle;">
                     Multiplier Boost (200 Premium Credits)
                 </button>
             </div>
+            <button onclick="toggleShop()">Exit Shop</button>
         </div>
 
         <!-- Admin Panel Access -->
@@ -218,18 +202,6 @@
         function clickButton() {
             score += clickPower * multiplier;
             updateScore();
-            animateScoreIncrease();
-        }
-
-        // Animate score increase visually
-        function animateScoreIncrease() {
-            const scoreElement = document.getElementById("score");
-            scoreElement.classList.add("scoreBoost");
-
-            // Remove the animation after it completes
-            setTimeout(() => {
-                scoreElement.classList.remove("scoreBoost");
-            }, 500);
         }
 
         // Auto-clicker that increases the score over time
@@ -366,6 +338,20 @@
         function resetAdminPanel() {
             document.getElementById("adminPanel").style.display = "none";
             document.getElementById("adminCode").disabled = false;
+        }
+
+        // Toggle shop visibility
+        function toggleShop() {
+            const shopSection = document.getElementById("shopSection");
+            const shopButton = document.getElementById("shopToggleButton");
+
+            if (shopSection.style.display === "none" || shopSection.style.display === "") {
+                shopSection.style.display = "block";
+                shopButton.innerText = "Exit Shop";
+            } else {
+                shopSection.style.display = "none";
+                shopButton.innerText = "Enter Shop";
+            }
         }
 
         // Initialize the game state
