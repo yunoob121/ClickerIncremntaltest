@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker Game with Save State and Leaderboard</title>
+    <title>Colorful Clicker Game with Animations</title>
     <style>
         body {
             display: flex;
@@ -11,36 +11,52 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f5f5f5;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: 'Arial', sans-serif;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .container {
             text-align: center;
+            position: relative;
         }
 
         .click-button {
             padding: 20px 40px;
             font-size: 24px;
-            background-color: #4CAF50;
+            background: linear-gradient(45deg, #ff6f61, #ffcc00);
             color: white;
             border: none;
             cursor: pointer;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, background 0.2s ease;
             margin-bottom: 20px;
         }
 
         .click-button:hover {
-            background-color: #45a049;
+            transform: scale(1.1);
+            background: linear-gradient(45deg, #ffcc00, #ff6f61);
+        }
+
+        .score {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #333;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
 
         .number {
             position: absolute;
             font-size: 24px;
-            color: #4CAF50;
+            color: #ff6f61;
+            font-weight: bold;
             opacity: 1;
             transform: translate(-50%, -50%);
             animation: floatUp 1.5s ease-out forwards;
@@ -57,19 +73,16 @@
             }
         }
 
-        .score {
-            margin-top: 20px;
-            font-size: 32px;
-            color: #333;
-        }
-
         .leaderboard {
             margin-top: 40px;
             font-size: 18px;
+            color: #333;
+            animation: fadeIn 1s ease-out;
         }
 
         .leaderboard h2 {
             margin-bottom: 10px;
+            color: #ff6f61;
         }
 
         .leaderboard ul {
@@ -83,6 +96,37 @@
 
         .leaderboard li span {
             font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .leaderboard li:nth-child(odd) {
+            background-color: #f0f0f0;
+        }
+
+        .leaderboard li:nth-child(even) {
+            background-color: #f7f7f7;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background-color: #ff6f61;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background-color: #ffcc00;
+        }
+
+        button:active {
+            transform: scale(1);
         }
     </style>
 </head>
@@ -99,8 +143,8 @@
         </div>
 
         <div>
-            <button class="click-button" onclick="saveGame()">Save Game</button>
-            <button class="click-button" onclick="loadGame()">Load Game</button>
+            <button onclick="saveGame()">Save Game</button>
+            <button onclick="loadGame()">Load Game</button>
         </div>
     </div>
 
