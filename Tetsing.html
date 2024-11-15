@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Specs Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+      max-width: 600px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f8f8f8;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Your System Specifications</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody id="specs">
+      <!-- Specs will be dynamically added here -->
+    </tbody>
+  </table>
+  <script>
+    function getSpecs() {
+      const specs = {
+        "Operating System": navigator.platform,
+        "Browser": navigator.userAgentData ? navigator.userAgentData.brands.map(b => b.brand + " " + b.version).join(", ") : navigator.userAgent,
+        "Language": navigator.language || navigator.userLanguage,
+        "Online Status": navigator.onLine ? "Online" : "Offline",
+        "Screen Resolution": `${screen.width} x ${screen.height}`,
+        "Color Depth": `${screen.colorDepth}-bit`,
+        "Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+        "Cookies Enabled": navigator.cookieEnabled ? "Yes" : "No",
+        "JavaScript Enabled": "Yes",
+        "User Agent": navigator.userAgent
+      };
+
+      return specs;
+    }
+
+    function displaySpecs() {
+      const specs = getSpecs();
+      const specsTable = document.getElementById("specs");
+      let specsText = "";
+
+      for (const [key, value] of Object.entries(specs)) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${key}</td><td>${value}</td>`;
+        specsTable.appendChild(row);
+
+        // Append to text for file
+        specsText += `${key}: ${value}\n`;
+      }
+
+      saveSpecsToFile(specsText);
+    }
+
+    function saveSpecsToFile(text) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'system_specs.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    displaySpecs();
+  </script>
+</body>
+</html>
