@@ -13,6 +13,7 @@
             padding: 20px;
             text-align: center;
             color: white;
+            animation: fadeIn 1s ease-in-out;
         }
 
         .container {
@@ -23,11 +24,13 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideUp 1s ease-out;
         }
 
         h1 {
             color: #fff;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: fadeInText 2s ease-in-out;
         }
 
         .score, .auto-clicker, .upgrade, .prestige, .currency-info {
@@ -36,36 +39,33 @@
             padding: 10px;
             margin: 10px 0;
             transition: background 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards;
         }
 
         /* Button styles */
         button {
-            background-color: #4CAF50;
-            color: white;
             border: none;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
+            padding: 0;
             display: inline-block;
-            font-size: 16px;
-            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
+            background: none;
+            outline: none;
         }
 
-        button:hover {
-            background-color: #45a049;
+        button img {
+            width: 150px;
+            height: auto;
+            transition: transform 0.3s ease;
+            animation: scaleIn 0.5s ease-in-out;
+        }
+
+        button img:hover {
             transform: scale(1.1);
         }
 
-        button:active {
+        button:active img {
             transform: scale(0.95);
-            background-color: #e7e7e7;
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
         }
 
         /* Shop section styles */
@@ -76,16 +76,22 @@
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
+            animation: fadeIn 1s ease-in-out;
         }
 
-        .premium-item {
+        .premium-item, .basic-item {
             margin-bottom: 15px;
         }
 
-        .premium-item button {
+        .premium-item button, .basic-item button {
             background-color: #ff007f;
             font-size: 16px;
             padding: 10px 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .premium-item button:hover, .basic-item button:hover {
+            background-color: #ff3399;
         }
 
         /* Admin Panel styles */
@@ -95,16 +101,59 @@
             padding: 20px;
             margin-top: 20px;
             border-radius: 10px;
+            animation: slideUp 1s ease-out;
         }
 
+        /* Animations */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            0% {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInText {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0.5);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Complex Incremental Clicker Game</h1>
 
-        <!-- Click Me Button -->
-        <button class="click-button" id="clickButton" onclick="clickButton()">Click Me!</button>
+        <!-- Click Me Button with Image -->
+        <button class="click-button" id="clickButton" onclick="clickButton()">
+            <img src="https://www.example.com/click-button-image.png" alt="Click Me!" />
+        </button>
         <div class="score" id="score">Score: 0</div>
         <div class="auto-clicker" id="autoClicker">Auto-clicker Level: 0</div>
         <div class="upgrade">
@@ -130,11 +179,11 @@
             <button class="microtransaction-button" id="purchaseCredits" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
         </div>
 
-        <!-- Shop Toggle Button -->
-        <button id="shopToggleButton" onclick="toggleShop()">Enter Shop</button>
+        <!-- Toggle Shop Button -->
+        <button id="shopToggleButton" onclick="toggleShop()">Enter Premium Shop</button>
 
         <!-- Premium Shop Section -->
-        <div class="shop-section" id="shopSection">
+        <div class="shop-section" id="premiumShop">
             <h3>Premium Shop</h3>
             <div class="premium-item">
                 <button class="microtransaction-button" id="instantScoreBoost" onclick="instantScoreBoost()">
@@ -151,7 +200,31 @@
                     Multiplier Boost (200 Premium Credits)
                 </button>
             </div>
-            <button onclick="toggleShop()">Exit Shop</button>
+            <button onclick="toggleShop()">Exit Premium Shop</button>
+        </div>
+
+        <!-- Toggle Basic Upgrades Shop -->
+        <button id="basicShopToggleButton" onclick="toggleBasicShop()">Enter Basic Upgrades Shop</button>
+
+        <!-- Basic Upgrades Shop Section -->
+        <div class="shop-section" id="basicShop">
+            <h3>Basic Upgrades Shop</h3>
+            <div class="basic-item">
+                <button class="microtransaction-button" id="upgradeClick" onclick="buyClickUpgrade()">
+                    Upgrade Click Power (Cost: 50)
+                </button>
+            </div>
+            <div class="basic-item">
+                <button class="microtransaction-button" id="upgradeAutoClick" onclick="buyAutoClicker()">
+                    Buy Auto-Clicker (Cost: 100)
+                </button>
+            </div>
+            <div class="basic-item">
+                <button class="microtransaction-button" id="upgradeMultiplier" onclick="buyMultiplier()">
+                    Buy Multiplier (Cost: 500)
+                </button>
+            </div>
+            <button onclick="toggleBasicShop()">Exit Basic Upgrades Shop</button>
         </div>
 
         <!-- Admin Panel Access -->
@@ -250,20 +323,6 @@
             }
         }
 
-        // Function to handle the prestige system
-        function prestige() {
-            const cost = 1000;
-            if (score >= cost) {
-                score = 0;
-                clickPower = 1;
-                autoClickerRate = 0;
-                multiplier = 1;
-                updateScore();
-            } else {
-                alert("You do not have enough score to prestige!");
-            }
-        }
-
         // Virtual currency system: Simulate a purchase
         function purchaseCredits() {
             premiumCredits += 100;
@@ -304,53 +363,35 @@
             }
         }
 
-        // Admin Panel code entry
-        function checkAdminCode() {
-            const adminCode = document.getElementById("adminCode").value;
-            if (adminCode === "admin!") {
-                document.getElementById("adminPanel").style.display = "block";
-                document.getElementById("adminCode").disabled = true;
+        // Toggle the Premium Shop visibility
+        function toggleShop() {
+            const premiumShop = document.getElementById("premiumShop");
+            const basicShop = document.getElementById("basicShop");
+            const premiumShopButton = document.getElementById("shopToggleButton");
+
+            if (premiumShop.style.display === "none" || premiumShop.style.display === "") {
+                premiumShop.style.display = "block";
+                basicShop.style.display = "none";  // Hide the basic shop if premium is open
+                premiumShopButton.innerText = "Exit Premium Shop";
             } else {
-                alert("Incorrect Admin Code");
+                premiumShop.style.display = "none";
+                premiumShopButton.innerText = "Enter Premium Shop";
             }
         }
 
-        // Admin Panel Functions
-        function forceGiveMoney() {
-            score += 10000;
-            updateScore();
-        }
+        // Toggle the Basic Shop visibility
+        function toggleBasicShop() {
+            const basicShop = document.getElementById("basicShop");
+            const premiumShop = document.getElementById("premiumShop");
+            const basicShopButton = document.getElementById("basicShopToggleButton");
 
-        function buyAllUpgrades() {
-            clickPower = 100;
-            autoClickerRate = 100;
-            multiplier = 100;
-            score = 1000000;
-            updateScore();
-        }
-
-        function increaseSpeed() {
-            clearInterval(autoClickerInterval);
-            startAutoClicker();
-            alert("Game speed increased!");
-        }
-
-        function resetAdminPanel() {
-            document.getElementById("adminPanel").style.display = "none";
-            document.getElementById("adminCode").disabled = false;
-        }
-
-        // Toggle shop visibility
-        function toggleShop() {
-            const shopSection = document.getElementById("shopSection");
-            const shopButton = document.getElementById("shopToggleButton");
-
-            if (shopSection.style.display === "none" || shopSection.style.display === "") {
-                shopSection.style.display = "block";
-                shopButton.innerText = "Exit Shop";
+            if (basicShop.style.display === "none" || basicShop.style.display === "") {
+                basicShop.style.display = "block";
+                premiumShop.style.display = "none";  // Hide the premium shop if basic is open
+                basicShopButton.innerText = "Exit Basic Upgrades Shop";
             } else {
-                shopSection.style.display = "none";
-                shopButton.innerText = "Enter Shop";
+                basicShop.style.display = "none";
+                basicShopButton.innerText = "Enter Basic Upgrades Shop";
             }
         }
 
