@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complex Incremental Clicker Game</title>
     <style>
-        /* Basic styles and animations */
+        /* Your original styles remain here */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -30,26 +30,54 @@
         #premiumShop, #basicShop {
             display: none;
         }
+        .purchase-info {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .premium-item {
+            margin: 10px;
+        }
+        .prestige-info {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Complex Incremental Clicker Game</h1>
         
+        <!-- Click Me Button -->
         <button class="btn" id="clickButton" onclick="clickButton()">Click Me!</button>
         <div id="score">Score: 0</div>
+        <div id="autoClicker">Auto-clicker Level: 0</div>
         
         <!-- Basic Upgrades -->
         <div class="upgrade">
             <button class="btn" id="upgradeClick" onclick="buyClickUpgrade()">Upgrade Click Power (Cost: 50)</button>
-            <div id="clickUpgradeInfo">Current Click Power: 1</div>
+            <div class="purchase-info" id="clickUpgradeInfo">Current Click Power: 1</div>
+        </div>
+        
+        <div class="upgrade">
+            <button class="btn" id="upgradeAutoClick" onclick="buyAutoClicker()">Buy Auto-Clicker (Cost: 100)</button>
+            <div class="purchase-info" id="autoClickerInfo">Auto-clicker: 0 points per second</div>
+        </div>
+        
+        <div class="upgrade">
+            <button class="btn" id="upgradeMultiplier" onclick="buyMultiplier()">Buy Multiplier (Cost: 500)</button>
+            <div class="purchase-info" id="multiplierInfo">Multiplier: 1x</div>
         </div>
 
         <!-- Premium Currency Section -->
         <div class="currency-info">
             <p>Premium Credits: <span id="premiumCredits">0</span></p>
-            <button class="btn" id="purchaseCredits" onclick="purchaseCredits()">Buy 100 Premium Credits</button>
+            <button class="btn" id="purchaseCredits" onclick="purchaseCredits()">Buy 100 Premium Credits (Fake Transaction)</button>
         </div>
+
+        <!-- Basic Upgrades Shop Button -->
+        <button class="btn" id="basicShopToggle" onclick="toggleBasicShop()">Open Basic Shop</button>
+
+        <!-- Premium Shop Button -->
+        <button class="btn" id="premiumShopToggle" onclick="toggleShop()">Open Premium Shop</button>
 
         <!-- Save/Load buttons -->
         <div>
@@ -60,9 +88,9 @@
         <!-- Basic Upgrades Shop -->
         <div id="basicShop">
             <h2>Basic Upgrades</h2>
-            <button class="btn" onclick="buyClickUpgrade()">Buy Click Power Upgrade</button>
-            <button class="btn" onclick="buyAutoClicker()">Buy Auto Clicker (Cost: 100)</button>
-            <button class="btn" onclick="buyMultiplier()">Buy Multiplier (Cost: 500)</button>
+            <button class="btn" onclick="buyClickUpgrade()">Upgrade Click Power</button>
+            <button class="btn" onclick="buyAutoClicker()">Buy Auto-Clicker</button>
+            <button class="btn" onclick="buyMultiplier()">Buy Multiplier</button>
             <button class="btn" onclick="toggleBasicShop()">Exit Basic Shop</button>
         </div>
 
@@ -97,7 +125,6 @@
             document.getElementById("upgradeClick").disabled = score < 50;
             document.getElementById("upgradeAutoClick").disabled = score < 100;
             document.getElementById("upgradeMultiplier").disabled = score < 500;
-            document.getElementById("prestigeButton").disabled = score < 1000;
         }
 
         // Function for when you click the main button
@@ -143,6 +170,22 @@
             }
         }
 
+        // Auto-clicker that increases the score over time
+        function startAutoClicker() {
+            if (autoClickerInterval) return; // Only start once
+            autoClickerInterval = setInterval(() => {
+                score += autoClickerRate * multiplier;
+                updateScore();
+            }, 1000);
+        }
+
+        // Virtual currency system: Simulate a purchase
+        function purchaseCredits() {
+            premiumCredits += 100;
+            updateScore();
+            alert("You have successfully purchased 100 Premium Credits!");
+        }
+
         // Instant score boost using premium credits
         function instantScoreBoost() {
             if (premiumCredits >= 50) {
@@ -176,41 +219,10 @@
             }
         }
 
-        // Save game state to localStorage
-        function saveGame() {
-            const gameState = {
-                score: score,
-                clickPower: clickPower,
-                autoClickerRate: autoClickerRate,
-                multiplier: multiplier,
-                premiumCredits: premiumCredits
-            };
-            localStorage.setItem("incrementalGameState", JSON.stringify(gameState));
-            alert("Game Saved!");
-        }
-
-        // Load game state from localStorage
-        function loadGame() {
-            const savedState = localStorage.getItem("incrementalGameState");
-            if (savedState) {
-                const gameState = JSON.parse(savedState);
-                score = gameState.score;
-                clickPower = gameState.clickPower;
-                autoClickerRate = gameState.autoClickerRate;
-                multiplier = gameState.multiplier;
-                premiumCredits = gameState.premiumCredits;
-                updateScore();
-                alert("Game Loaded!");
-            } else {
-                alert("No saved game found.");
-            }
-        }
-
         // Toggle the Premium Shop visibility
         function toggleShop() {
             const premiumShop = document.getElementById("premiumShop");
             const basicShop = document.getElementById("basicShop");
-            const premiumShopButton = document.getElementById("shopToggleButton");
 
             if (premiumShop.style.display === "none" || premiumShop.style.display === "") {
                 premiumShop.style.display = "block";
@@ -233,13 +245,38 @@
             }
         }
 
-        // Initialize the game and load saved state (if any)
-        function initGame() {
-            updateScore();
+        // Save game state to localStorage
+        function saveGame() {
+            const gameState = {
+                score: score,
+                clickPower: clickPower,
+                autoClickerRate: autoClickerRate,
+                multiplier: multiplier,
+                premiumCredits: premiumCredits
+            };
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+            alert("Game saved!");
         }
 
-        // Call initGame when the page loads
-        window.onload = initGame;
+        // Load game state from localStorage
+        function loadGame() {
+            const savedState = localStorage.getItem('gameState');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                score = gameState.score;
+                clickPower = gameState.clickPower;
+                autoClickerRate = gameState.autoClickerRate;
+                multiplier = gameState.multiplier;
+                premiumCredits = gameState.premiumCredits;
+                updateScore();
+                alert("Game loaded!");
+            } else {
+                alert("No saved game found.");
+            }
+        }
+
+        // Initialize game state
+        updateScore();
     </script>
 </body>
 </html>
