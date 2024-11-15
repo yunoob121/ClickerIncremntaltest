@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            text-align: center;
+        }
+
+        .click-button {
+            padding: 20px 40px;
+            font-size: 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .click-button:hover {
+            background-color: #45a049;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 24px;
+            color: #4CAF50;
+            opacity: 1;
+            transform: translate(-50%, -50%);
+            animation: floatUp 1.5s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translate(-50%, -50%) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -150%) translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        .score {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="click-button" id="clickButton" onclick="clickButton()">Click Me!</button>
+        <div class="score" id="score">Score: 0</div>
+    </div>
+
+    <script>
+        let score = 0;
+
+        // Function for the click action
+        function clickButton() {
+            // Increase score
+            score++;
+            updateScore();
+
+            // Create a floating number that appears above the button
+            createFloatingNumber(score);
+        }
+
+        // Function to update the score displayed on the screen
+        function updateScore() {
+            document.getElementById("score").innerText = "Score: " + score;
+        }
+
+        // Function to create a floating number above the button
+        function createFloatingNumber(number) {
+            const floatingNumber = document.createElement("div");
+            floatingNumber.classList.add("number");
+            floatingNumber.innerText = `+${number}`;
+
+            // Position the floating number at the center of the button
+            const button = document.getElementById("clickButton");
+            const buttonRect = button.getBoundingClientRect();
+            const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+            const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+
+            floatingNumber.style.left = `${buttonCenterX}px`;
+            floatingNumber.style.top = `${buttonCenterY}px`;
+
+            document.body.appendChild(floatingNumber);
+
+            // Remove the floating number after the animation ends
+            setTimeout(() => {
+                floatingNumber.remove();
+            }, 1500); // Matches the animation duration
+        }
+    </script>
+</body>
+</html>
