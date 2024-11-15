@@ -3,98 +3,239 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Specs Viewer</title>
+  <title>Advanced System Specs Viewer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to right, #ece9e6, #ffffff);
       margin: 0;
-      padding: 20px;
+      padding: 0;
       text-align: center;
-    }
-    h1 {
       color: #333;
     }
-    table {
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px 0;
+    }
+    header h1 {
+      margin: 0;
+    }
+    .container {
+      max-width: 1200px;
       margin: 20px auto;
-      border-collapse: collapse;
-      width: 80%;
-      max-width: 600px;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
     }
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-    th, td {
-      padding: 10px;
+    .spec-category {
+      margin: 20px 0;
       text-align: left;
     }
-    th {
-      background-color: #f8f8f8;
+    .spec-category h2 {
+      font-size: 24px;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 5px;
     }
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
+    .spec-category ul {
+      list-style: none;
+      padding: 0;
+    }
+    .spec-category li {
+      font-size: 18px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+    }
+    .spec-category li i {
+      margin-right: 10px;
+      color: #4CAF50;
+    }
+    #adminAccess {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    #adminAccess input {
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 80%;
+    }
+    #adminAccess button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #adminAccess button:hover {
+      background-color: #45a049;
+    }
+    #dataOutput {
+      margin-top: 20px;
+      text-align: left;
+    }
+    #charts {
+      margin-top: 30px;
+    }
+    .chart-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
     }
   </style>
 </head>
 <body>
-  <h1>Your System Specifications</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Property</th>
-        <th>Value</th>
-      </tr>
-    </thead>
-    <tbody id="specs">
-      <!-- Specs will be dynamically added here -->
-    </tbody>
-  </table>
+  <header>
+    <h1><i class="fas fa-desktop"></i> Advanced System Specs Viewer</h1>
+  </header>
+  <div class="container">
+    <div class="spec-category">
+      <h2><i class="fas fa-laptop"></i> Device Information</h2>
+      <ul id="deviceInfo"></ul>
+    </div>
+    <div class="spec-category">
+      <h2><i class="fas fa-globe"></i> Browser Information</h2>
+      <ul id="browserInfo"></ul>
+    </div>
+    <div class="spec-category">
+      <h2><i class="fas fa-expand"></i> Display Information</h2>
+      <ul id="displayInfo"></ul>
+    </div>
+    <button id="uploadButton">Upload Specs</button>
+    <div id="adminAccess">
+      <h2>Admin Access</h2>
+      <input type="password" id="bypassCode" placeholder="Enter Bypass Code">
+      <button id="viewDataButton">View All Specs</button>
+      <div id="dataOutput"></div>
+    </div>
+    <div id="charts">
+      <div class="chart-container">
+        <canvas id="browserChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="screenResChart"></canvas>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const serverUrl = "http://localhost:3000"; // Change to your backend server URL
+
     function getSpecs() {
-      const specs = {
+      return {
         "Operating System": navigator.platform,
-        "Browser": navigator.userAgentData ? navigator.userAgentData.brands.map(b => b.brand + " " + b.version).join(", ") : navigator.userAgent,
+        "Browser": navigator.userAgentData 
+          ? navigator.userAgentData.brands.map(b => b.brand + " " + b.version).join(", ") 
+          : navigator.userAgent,
         "Language": navigator.language || navigator.userLanguage,
         "Online Status": navigator.onLine ? "Online" : "Offline",
         "Screen Resolution": `${screen.width} x ${screen.height}`,
         "Color Depth": `${screen.colorDepth}-bit`,
         "Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
         "Cookies Enabled": navigator.cookieEnabled ? "Yes" : "No",
-        "JavaScript Enabled": "Yes",
         "User Agent": navigator.userAgent
       };
+    }
 
-      return specs;
+    function categorizeSpecs(specs) {
+      return {
+        device: {
+          "Operating System": specs["Operating System"],
+          "Language": specs["Language"],
+          "Timezone": specs["Timezone"]
+        },
+        browser: {
+          "Browser": specs["Browser"],
+          "Online Status": specs["Online Status"],
+          "Cookies Enabled": specs["Cookies Enabled"],
+          "JavaScript Enabled": specs["JavaScript Enabled"]
+        },
+        display: {
+          "Screen Resolution": specs["Screen Resolution"],
+          "Color Depth": specs["Color Depth"],
+          "User Agent": specs["User Agent"]
+        }
+      };
     }
 
     function displaySpecs() {
       const specs = getSpecs();
-      const specsTable = document.getElementById("specs");
-      let specsText = "";
+      const categorized = categorizeSpecs(specs);
 
-      for (const [key, value] of Object.entries(specs)) {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${key}</td><td>${value}</td>`;
-        specsTable.appendChild(row);
+      const deviceInfo = document.getElementById("deviceInfo");
+      const browserInfo = document.getElementById("browserInfo");
+      const displayInfo = document.getElementById("displayInfo");
 
-        // Append to text for file
-        specsText += `${key}: ${value}\n`;
+      for (const [key, value] of Object.entries(categorized.device)) {
+        deviceInfo.innerHTML += `<li><i class="fas fa-info-circle"></i> <strong>${key}:</strong> ${value}</li>`;
       }
-
-      saveSpecsToFile(specsText);
+      for (const [key, value] of Object.entries(categorized.browser)) {
+        browserInfo.innerHTML += `<li><i class="fas fa-globe"></i> <strong>${key}:</strong> ${value}</li>`;
+      }
+      for (const [key, value] of Object.entries(categorized.display)) {
+        displayInfo.innerHTML += `<li><i class="fas fa-desktop"></i> <strong>${key}:</strong> ${value}</li>`;
+      }
+      
+      return specs;
     }
 
-    function saveSpecsToFile(text) {
-      const blob = new Blob([text], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'system_specs.txt';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    async function uploadSpecs(specs) {
+      try {
+        const response = await fetch(`${serverUrl}/upload`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ specs }),
+        });
+        const result = await response.json();
+        alert(result.message);
+      } catch (error) {
+        console.error("Error uploading specs:", error);
+        alert("Failed to upload specs.");
+      }
     }
 
-    displaySpecs();
-  </script>
-</body>
-</html>
+    async function viewAllData(bypassCode) {
+      try {
+        const response = await fetch(`${serverUrl}/admin?bypassCode=${bypassCode}`);
+        const result = await response.json();
+        if (result.success) {
+          const output = document.getElementById("dataOutput");
+          output.innerHTML = `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          generateCharts(result.data);
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        console.error("Error retrieving data:", error);
+        alert("Failed to retrieve data.");
+      }
+    }
+
+    function generateCharts(data) {
+      // Extract data for charts
+      const browserCounts = {};
+      const screenResCounts = {};
+
+      data.forEach(specs => {
+        const browser = specs["Browser"] || "Unknown";
+        browserCounts[browser] = (browserCounts[browser] || 0) + 1;
+
+        const screenRes = specs["Screen Resolution"] || "Unknown";
+        screenResCounts[screenRes] = (screenResCounts[screenRes] || 0) + 1;
+      });
+
+      const browserChartCtx = document.getElementById("browserChart").getContext("2d");
+      const screenResChartCtx = document.getElementById("screenResChart").getContext("2d");
+
+      new Chart(browserChartCtx, {
+        type: 'pie',
+        data: {
