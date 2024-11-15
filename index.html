@@ -5,11 +5,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complex Incremental Clicker Game with Microtransactions</title>
     <style>
-        /* Your original styles remain here */
-        .disabled {
+        /* Body and general styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://www.example.com/background-image.jpg') no-repeat center center fixed;
+            background-size: cover;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #ff66cc, #ff3399);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .score, .auto-clicker, .upgrade, .prestige, .currency-info, .premium-shop {
+            background: linear-gradient(45deg, #ff8c00, #ff6347);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            transition: background 0.3s ease;
+        }
+
+        .upgrade, .prestige, .currency-info {
+            background: linear-gradient(45deg, #ff8c00, #ff6347);
+        }
+
+        /* Button styles */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+
+        button:active {
+            transform: scale(0.95);
+            background-color: #e7e7e7;
+        }
+
+        button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
+
+        /* Animations for score and buttons */
+        @keyframes scoreBoost {
+            0% {
+                color: yellow;
+                font-size: 1.2em;
+            }
+            100% {
+                color: white;
+                font-size: 1em;
+            }
+        }
+
+        #score {
+            animation: scoreBoost 0.5s ease-in-out;
+        }
+
+        @keyframes upgradeFlash {
+            0% {
+                background-color: #ff4500;
+            }
+            100% {
+                background-color: #4CAF50;
+            }
+        }
+
+        .upgrade-button:enabled {
+            animation: upgradeFlash 0.5s ease-in-out;
+        }
+
+        /* Auto-clicker animation */
+        .auto-clicker img {
+            width: 40px;
+            vertical-align: middle;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
     </style>
 </head>
 <body>
@@ -47,13 +151,22 @@
         <div class="premium-shop">
             <h3>Premium Shop</h3>
             <div class="premium-item">
-                <button class="microtransaction-button" id="instantScoreBoost" onclick="instantScoreBoost()">Instant Score Boost (Cost: 50 Premium Credits)</button>
+                <button class="microtransaction-button" id="instantScoreBoost" onclick="instantScoreBoost()">
+                    <img src="https://www.example.com/score-boost-icon.png" alt="Instant Score Boost" style="width: 30px; vertical-align: middle;">
+                    Instant Score Boost (50 Premium Credits)
+                </button>
             </div>
             <div class="premium-item">
-                <button class="microtransaction-button" id="boostAutoClicker" onclick="boostAutoClicker()">Speed Up Auto-Clicker (Cost: 100 Premium Credits)</button>
+                <button class="microtransaction-button" id="boostAutoClicker" onclick="boostAutoClicker()">
+                    <img src="https://www.example.com/auto-clicker-icon.png" alt="Boost Auto-Clicker" style="width: 30px; vertical-align: middle;">
+                    Speed Up Auto-Clicker (100 Premium Credits)
+                </button>
             </div>
             <div class="premium-item">
-                <button class="microtransaction-button" id="boostMultiplier" onclick="boostMultiplier()">Multiplier Boost (Cost: 200 Premium Credits)</button>
+                <button class="microtransaction-button" id="boostMultiplier" onclick="boostMultiplier()">
+                    <img src="https://www.example.com/multiplier-icon.png" alt="Multiplier Boost" style="width: 30px; vertical-align: middle;">
+                    Multiplier Boost (200 Premium Credits)
+                </button>
             </div>
         </div>
 
@@ -105,6 +218,18 @@
         function clickButton() {
             score += clickPower * multiplier;
             updateScore();
+            animateScoreIncrease();
+        }
+
+        // Animate score increase visually
+        function animateScoreIncrease() {
+            const scoreElement = document.getElementById("score");
+            scoreElement.classList.add("scoreBoost");
+
+            // Remove the animation after it completes
+            setTimeout(() => {
+                scoreElement.classList.remove("scoreBoost");
+            }, 500);
         }
 
         // Auto-clicker that increases the score over time
@@ -245,7 +370,6 @@
 
         // Initialize the game state
         updateScore();
-
     </script>
 </body>
 </html>
