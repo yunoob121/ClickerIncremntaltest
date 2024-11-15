@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shooter Builder Game with AI</title>
+  <style>
+    body {
+      margin: 0;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background: #a6dcef;
+    }
+    h1 {
+      margin: 10px 0;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border: 1px solid black;
+      background: #cce7f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shooter Game with AI Enemies</h1>
+  <p>WASD to move, Left click to shoot, Right click to build blocks</p>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const player = { x: 400, y: 300, width: 20, height: 20, speed: 5 };
+    const bullets = [];
+    const blocks = [];
+    const enemies = [];
+    const keys = {};
+
+    // Enemy spawn timer
+    let enemySpawnTimer = 0;
+
+    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+    canvas.addEventListener('click', shootBullet);
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      placeBlock(e.offsetX, e.offsetY);
+    });
+
+    function shootBullet() {
+      bullets.push({ x: player.x + player.width / 2 - 2.5, y: player.y, size: 5, speed: 10 });
+    }
+
+    function placeBlock(x, y) {
+      blocks.push({ x: Math.floor(x / 40) * 40, y: Math.floor(y / 40) * 40, size: 40 });
+    }
+
+    function spawnEnemy() {
+      const side = Math.floor(Math.random() * 4);
+      let x, y;
+
+      // Spawn enemies randomly from one of the four sides of the canvas
+      if (side === 0) { // Top
+        x = Math.random() * canvas.width;
+        y = -20;
+      } else if (side === 1) { // Right
+        x = canvas.width + 20;
+        y = Math.random() * canvas.height;
+      } else if (side === 2) { // Bottom
+        x = Math.random() * canvas.width;
+        y = canvas.height + 20;
+      } else { // Left
+        x = -20;
+        y = Math.random() * canvas.height;
+      }
+
+      enemies.push({ x, y, width: 20, height: 20, speed: 2 });
+    }
+
+    function update() {
+      // Player movement
+      if (keys['w']) player.y -= player.speed;
+      if (keys['s']) player.y += player.speed;
+      if (keys['a']) player.x -= player.speed;
+      if (keys['d']) player.x += player.speed;
+
+      // Move bullets
+      bullets.forEach((bullet, bIndex) => {
+        bullet.y -= bullet.speed;
+        if (bullet.y < 0) bullets.splice(bIndex, 1);
+      });
+
+      // Move enemies toward the player
+      enemies.forEach((enemy, eIndex) => {
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        enemy.x += (dx / dist) * enemy.speed;
+        enemy.y += (dy / dist) * enemy.speed;
+
+        // Check if enemy reaches the player
+        if (
+          enemy.x < player.x + player.width &&
+          enemy.x + enemy.width > player.x &&
+          enemy.y < player.y + player.height &&
+          enemy.y + enemy.height > player.y
+        ) {
+          alert('Game Over! The enemies got you!');
+          document.location.reload();
+        }
+
+        // Check if bullets hit enemies
+        bullets.forEach((bullet, bIndex) => {
+          if (
+            bullet.x < enemy.x + enemy.width &&
+            bullet.x + bullet.size > enemy.x &&
+            bullet.y < enemy.y + enemy.height &&
+            bullet.y + bullet.size > enemy.y
+          ) {
+            enemies.splice(eIndex, 1);
+            bullets.splice(bIndex, 1);
+          }
+        });
+      });
+
+      // Enemy spawn logic
+      enemySpawnTimer++;
+      if (enemySpawnTimer > 100) { // Spawn an enemy every 100 frames
+        spawnEnemy();
+        enemySpawnTimer = 0;
+      }
+
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw player
+      ctx.fillStyle = 'blue';
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // Draw bullets
+      ctx.fillStyle = 'red';
+      bullets.forEach(bullet => {
+        ctx.fillRect(bullet.x, bullet.y, bullet.size, bullet.size);
+      });
+
+      // Draw blocks
+      ctx.fillStyle = 'green';
+      blocks.forEach(block => {
+        ctx.fillRect(block.x, block.y, block.size, block.size);
+      });
+
+      // Draw enemies
+      ctx.fillStyle = 'purple';
+      enemies.forEach(enemy => {
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+      });
+    }
+
+    update();
+  </script>
+</body>
+</html>
